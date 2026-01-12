@@ -12,3 +12,17 @@ def count_words_and_lines(file_path):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None, None
+    
+
+# Example usage
+count_words_and_lines('sample.txt')
+
+
+# or using the function and printing results
+file_path = 'sample.txt'  # Replace with your file path
+words, lines = count_words_and_lines(file_path)
+
+# Print the results
+if words is not None and lines is not None:
+    print(f"Word Count: {words}")
+    print(f"Line Count: {lines}")
