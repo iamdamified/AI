@@ -15,11 +15,12 @@ def count_words_and_lines(file_path):
     
 
 # Example usage
-count_words_and_lines('sample.txt')
+stats = count_words_and_lines('text_cleaner.py')
+print(stats)
 
 
 # or using the function and printing results
-file_path = 'sample.txt'  # Replace with your file path
+file_path = 'text_cleaner.py'  # Replace with your file path
 words, lines = count_words_and_lines(file_path)
 
 # Print the results

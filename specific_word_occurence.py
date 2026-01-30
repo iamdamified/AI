@@ -10,3 +10,8 @@ def count_word_in_file(filename, word):
         print(f"The file {filename} does not exist.")
 count_word_in_file('fruits.txt', 'apple')# The word 'apple' occurs 1 times in the file fruits.txt.
 # The word 'apple' occurs 1 times in the file fruits.txt.
+
+# .lower() changes all the characters in the file named as contents to lowercase
+# .split() splits the contents into a list of words
+# .count() counts the number of occurrences of the specified word in the list
+

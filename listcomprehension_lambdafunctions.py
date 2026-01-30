@@ -29,11 +29,15 @@ squared_numbers = list(map(lambda x: x**2, numbers))
 print("squared_numbers using lambda and map:", squared_numbers)
 #squared_numbers using lambda and map: [1, 4, 9, 16, 25]
 
+# map applies the lambda function to each item in the iterable and returns a list of the results.
+
 
 """filter even numbers from a list using lambda and filter"""
 even_numbers = list(filter(lambda x: x % 2 == 0, numbers))
 print("even_numbers using lambda and filter:", even_numbers)
 #even_numbers using lambda and filter: [2, 4]
+
+# filter applies the lambda function to each item in the iterable and includes the item in the result if the function returns True.
 
 
 
@@ -43,3 +47,5 @@ numbers = [1, 2, 3, 4, 5]
 product = reduce(lambda x, y: x * y, numbers)
 print("product using lambda and reduce:", product)
 #product using lambda and reduce: 120
+
+# reduce applies the lambda function cumulatively to the items of the iterable, from left to right, so as to reduce the iterable to a single value.
