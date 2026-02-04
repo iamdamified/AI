@@ -4,7 +4,7 @@ def count_words_and_lines(file_path):
         with open(file_path, 'r') as file:
             lines = file.readlines()
             line_count = len(lines)
-            word_count = sum(len(line.split()) for line in lines)
+            word_count = sum(len(i.split()) for i in lines)
         return word_count, line_count
     except FileNotFoundError:
         print(f"Error: The file '{file_path}' was not found!")

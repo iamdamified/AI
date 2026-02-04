@@ -49,3 +49,8 @@ print("product using lambda and reduce:", product)
 #product using lambda and reduce: 120
 
 # reduce applies the lambda function cumulatively to the items of the iterable, from left to right, so as to reduce the iterable to a single value.
+
+# Linear Progression
+"""make a good example of a linear progression function"""
+
+
