@@ -15,3 +15,21 @@ sns.heatmap(data, annot=True, cmap='coolwarm')
 plt.title("Heatmap Example")
 plt.show()
 
+
+#Pair Plots: Used to visualize the relationships between multiple variables in a dataset.
+#1. Create a sample dataset
+df = np.random.rand(5, 5)
+sns.pairplot(df)
+plt.show()
+
+#2. Create a sample dataset
+df = pd.DataFrame({
+    'A': np.random.rand(100),
+    'B': np.random.rand(100),
+    'C': np.random.rand(100)
+})
+# Create a pair plot
+sns.pairplot(df)
+plt.suptitle("Pair Plot Example", y=1.02)
+plt.show()
+
