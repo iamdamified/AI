@@ -93,5 +93,3 @@ correlating with higher survival rates, while younger passengers with lower fare
 - The analysis of the Titanic dataset reveals significant patterns in survival rates based on passenger class, age, and fare paid. 
 These insights highlight the importance of socio-economic factors in survival outcomes during the disaster, as well as the demographic characteristics of the passengers on board. 
 Further analysis could explore additional factors such as gender and family size to gain a more comprehensive understanding of the survival dynamics."""
-
-
