@@ -18,11 +18,11 @@ df_sales = df_sales.dropna(axis=1, how="all") # remove empty columns "NaN" value
 df_sales = df_sales.dropna(how="all") # remove empty rows "NaN" values
 
 
-# Inspect raw dataset
-print(df_sales.head())
-print(df_sales.columns)
-print(df_sales.info())
-print(df_sales.describe())
+# Inspect dataset
+# print(df_sales.head())
+# print(df_sales.columns)
+# print(df_sales.info())
+# print(df_sales.describe())
 
 # The best usable data starts from row 4, so we set header=3 to read the column names correctly. We also drop any completely empty columns and rows to clean the dataset before analysis.
 # Therefore, for best visualization  we must rename the columns to more user-friendly/understandable names by creating a mapping of the original column names to new names and then applying it to the DataFrame.
@@ -67,7 +67,11 @@ df.columns = [
     "Canon_Unit", "Canon_Sales",
 ]
 
-#Alternatively, you can convert to long-format by separating product column from unit and "sales" columns, but for the sake of this task, we will keep it in wide-format and handle it accordingly in the visualizations and analysis.
+#Alternatively, you can convert to long-format by separating product column from unit and "sales" columns.
+#Long FORMAT BLOCK:
+
+
+
 # Inspect dataset again after cleaning and renaming
 print(df.head())
 print(df.columns)
@@ -84,21 +88,17 @@ df = df[df["Branch"].notna()]
 for col in df.columns[1:]:
     df[col] = pd.to_numeric(df[col], errors="coerce")
 
-# #Handle missing values: 
-#This is used to combine all sales columns into one column(sales_columns) for better handling in the absence of long-format data.
-sales_columns = [col for col in df.columns if col.endswith("_Sales")]
-
-for col in sales_columns:
-    df[col] = df[col].fillna(df[col].median())
+# #Handle missing values: this format works when the data is converted to long-format by separating product column from unit and "sales" columns.
+df["Sales"] = df["Sales"].fillna(df["Sales"].median()) #Best for Dashboards and ML
 
 # Remove Duplicate entries
 df = df.drop_duplicates()
 
 
 # Filter data: Sales greater than 1000
-for col in sales_columns:
-    high_sales = df[df[col] > 1000]
-    print(f"Sales greater than 1000 in {col}:\n{high_sales[['Branch', col]]}\n")
+high_sales = df[df["Sales"] > 1000] # Long-format filtering
+print(high_sales.head())
+
 
 
 
@@ -110,139 +110,130 @@ for col in sales_columns:
 Use libraries such as Matplotlib or Seaborn to create visualizations to highlight trends and patterns in the data."""
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-
 # Visualization 1: Sales Distribution (Box Plot)
-# Regular box plot for wide-format data: It involves creating a long-format version of the sales data for better visualization, as box plots are more effective when comparing distributions across categories(products).
-df_long = df.melt(id_vars="Branch", value_vars=sales_columns, var_name="Product", value_name="Sales")# Reuse this for other long format visualizations
-sns.boxplot(x="Product", y="Sales", data=df_long, color="orange")
-plt.xticks(rotation=45)
-plt.title("Sales Distribution by Product")
+#This works for Long Format data Visualization:
+sns.boxplot(x=df["Sales"], color="orange")
+plt.title("Sales Distribution")
+plt.xlabel("Sales")
 plt.show()
+
 
 
 # Visualization 2: Sales by Product (Bar Chart)
-# Regular bar chart for wide-format data:
-sales_by_product = df_long.groupby("Product", as_index=False)["Sales"].sum()
-# sales_by_product = (df_long.groupby("Product")["Sales"].sum().reset_index())
-sns.barplot(data=sales_by_product, x="Sales", y="Product", orient="h", color="green")
+#This works for Long Format data Visualization:
+sales_by_product = df.groupby("Product")["Sales"].sum()
+sales_by_product.plot(kind="bar", color="green")
 plt.title("Total Sales by Product")
-plt.xlabel("Total Sales")
-plt.ylabel("Product Category")
+plt.xlabel("Product")
+plt.ylabel("Total Sales")
+plt.xticks(rotation=45)
 plt.show()
+
 
 
 # Visualization 3: Pair Plot of Sales, Quantity, and Discount
-# Regular Pair Plot for wide-format data:
-# You will recall that so far we have sales_columns variable for all product sales, no units_columns, hence we create it.
-units_columns = [col for col in df.columns if col.endswith("_Units")]
-df_units = df.melt(id_vars="Branch", value_vars=units_columns, var_name="Product", value_name="Units")# newly created combined units_cloumn
-df_long = df.melt(id_vars="Branch", value_vars=sales_columns, var_name="Product", value_name="Sales")# recalled comnined sales_column above
-df_units_sales_long = pd.merge(df_units, df_long, on=["Branch", "Product"], how="inner") # Merge units and sales long-format data on Branch and Product for pairplot
-#display to view results of the merge and the new long-format dataframe for units and sales
-print(df_units_sales_long.head())
-print(df_units_sales_long.columns)
-
-# Now we can create a pair plot to visualize the relationship between Sales and Units, colored by Product category.
-sns.pairplot(df_units_sales_long, vars=["Sales", "Units"], hue="Product", diag_kind="kde", plot_kws={"alpha": 0.5})
-plt.suptitle("Sales vs Units by Product Category", y=1.02)
+#This works for Long Format data Visualization:
+sns.pairplot(df[["Sales", "Units"]], diag_kind="kde", plot_kws={"alpha": 0.5})
+plt.suptitle("Pair Plot of Sales, Unit", y=1.02)
 plt.show()
 
 
-# NEW TASK 3
-"""Create a dashboard for your findings using Dash."""
-# pip install dash plotly openpyxl
-
-# For creating a dashboard using Plotly and Dash, you would need to set up a Dash application. Below is a simple example of how to create a dashboard with Plotly and Dash to visualize the sales data.
-import dash
-# import dash_core_components as dcc
-# import dash_html_components as html
-from dash import dcc, html, Input, Output
-import plotly.express as px
-# Initialize the Dash app
-app = dash.Dash(__name__)
-app.title = "Westgate Sales Dashboard"
-
-# Layout
-app.layout = html.Div(
-    style={"padding": "20px", "fontFamily": "Arial"},
-    children=[
-        html.H1("Westgate 2024 Sales Dashboard", style={"textAlign": "center"}),
-
-        # KPI
-        html.Div(
-            children=[
-                html.H3("Total Sales"),
-                html.H2(f"₦{df_sales['Sales'].sum():,.2f}")
-            ],
-            style={
-                "textAlign": "center",
-                "marginBottom": "30px",
-                "backgroundColor": "#f2f2f2",
-                "padding": "15px",
-                "borderRadius": "10px"
-            }
-        ),
-
-        # Dropdown
-        html.Label("Select Category"),
-        dcc.Dropdown(
-            id="category-filter",
-            options=[
-                {"label": cat, "value": cat}
-                for cat in df_sales["Category"].unique()
-            ],
-            value=None,
-            placeholder="All Categories",
-            clearable=True
-        ),
-
-        html.Br(),
-
-        # Charts
-        dcc.Graph(id="sales-boxplot"),
-        dcc.Graph(id="sales-by-category")
-    ]
-)
-
-# Callbacks
-@app.callback(
-    Output("sales-boxplot", "figure"),
-    Output("sales-by-category", "figure"),
-    Input("category-filter", "value")
-)
-def update_charts(selected_category):
-    if selected_category:
-        filtered_df = df_sales[df_sales["Category"] == selected_category]
-    else:
-        filtered_df = df_sales
-
-    # Box plot
-    box_fig = px.box(
-        filtered_df,
-        x="Sales",
-        title="Sales Distribution",
-        color_discrete_sequence=["orange"]
-    )
-
-    # Bar chart
-    bar_data = (
-        filtered_df.groupby("Category", as_index=False)["Sales"].sum()
-    )
-    bar_fig = px.bar(
-        bar_data,
-        x="Category",
-        y="Sales",
-        title="Total Sales by Category",
-        color_discrete_sequence=["green"]
-    )
-
-    return box_fig, bar_fig
 
 
-# Run server
-if __name__ == "__main__":
-    app.run_server(debug=True)
+# # NEW TASK 3
+# """Create a dashboard for your findings using Plotly."""
+# # pip install dash plotly openpyxl
+
+# # For creating a dashboard using Plotly and Dash, you would need to set up a Dash application. Below is a simple example of how to create a dashboard with Plotly and Dash to visualize the sales data.
+# import dash
+# # import dash_core_components as dcc
+# # import dash_html_components as html
+# from dash import dcc, html, Input, Output
+# import plotly.express as px
+# # Initialize the Dash app
+# app = dash.Dash(__name__)
+# app.title = "Westgate Sales Dashboard"
+
+# # Layout
+# app.layout = html.Div(
+#     style={"padding": "20px", "fontFamily": "Arial"},
+#     children=[
+#         html.H1("Westgate 2024 Sales Dashboard", style={"textAlign": "center"}),
+
+#         # KPI
+#         html.Div(
+#             children=[
+#                 html.H3("Total Sales"),
+#                 html.H2(f"₦{df_sales['Sales'].sum():,.2f}")
+#             ],
+#             style={
+#                 "textAlign": "center",
+#                 "marginBottom": "30px",
+#                 "backgroundColor": "#f2f2f2",
+#                 "padding": "15px",
+#                 "borderRadius": "10px"
+#             }
+#         ),
+
+#         # Dropdown
+#         html.Label("Select Category"),
+#         dcc.Dropdown(
+#             id="category-filter",
+#             options=[
+#                 {"label": cat, "value": cat}
+#                 for cat in df_sales["Category"].unique()
+#             ],
+#             value=None,
+#             placeholder="All Categories",
+#             clearable=True
+#         ),
+
+#         html.Br(),
+
+#         # Charts
+#         dcc.Graph(id="sales-boxplot"),
+#         dcc.Graph(id="sales-by-category")
+#     ]
+# )
+
+# # Callbacks
+# @app.callback(
+#     Output("sales-boxplot", "figure"),
+#     Output("sales-by-category", "figure"),
+#     Input("category-filter", "value")
+# )
+# def update_charts(selected_category):
+#     if selected_category:
+#         filtered_df = df_sales[df_sales["Category"] == selected_category]
+#     else:
+#         filtered_df = df_sales
+
+#     # Box plot
+#     box_fig = px.box(
+#         filtered_df,
+#         x="Sales",
+#         title="Sales Distribution",
+#         color_discrete_sequence=["orange"]
+#     )
+
+#     # Bar chart
+#     bar_data = (
+#         filtered_df.groupby("Category", as_index=False)["Sales"].sum()
+#     )
+#     bar_fig = px.bar(
+#         bar_data,
+#         x="Category",
+#         y="Sales",
+#         title="Total Sales by Category",
+#         color_discrete_sequence=["green"]
+#     )
+
+#     return box_fig, bar_fig
+
+
+# # Run server
+# if __name__ == "__main__":
+#     app.run_server(debug=True)
 
 #Ensure you are in the right directory the excel file is located, then run it: cd Data_Science/Exploratory_Data_Analysis
 # run the code in terminal using: python eda_advtask_dashboard.py
