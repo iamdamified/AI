@@ -135,16 +135,19 @@ plt.show()
 # Visualization 3: Pair Plot of Sales, Quantity, and Discount
 # Regular Pair Plot for wide-format data:
 # You will recall that so far we have sales_columns variable for all product sales, no units_columns, hence we create it.
-units_columns = [col for col in df.columns if col.endswith("_Units")]
+units_columns = [col for col in df.columns if col.endswith("_Unit")]
 df_units = df.melt(id_vars="Branch", value_vars=units_columns, var_name="Product", value_name="Units")# newly created combined units_cloumn
+df_units["Product"] = df_units["Product"].str.replace("_Unit", "", regex=False)# Normalize units
 df_long = df.melt(id_vars="Branch", value_vars=sales_columns, var_name="Product", value_name="Sales")# recalled comnined sales_column above
+df_long["Product"] = df_long["Product"].str.replace("_Sales", "", regex=False)# Normalize sales
 df_units_sales_long = pd.merge(df_units, df_long, on=["Branch", "Product"], how="inner") # Merge units and sales long-format data on Branch and Product for pairplot
 #display to view results of the merge and the new long-format dataframe for units and sales
 print(df_units_sales_long.head())
 print(df_units_sales_long.columns)
+print(df_units_sales_long.shape)
 
 # Now we can create a pair plot to visualize the relationship between Sales and Units, colored by Product category.
-sns.pairplot(df_units_sales_long, vars=["Sales", "Units"], hue="Product", diag_kind="kde", plot_kws={"alpha": 0.5})
+sns.pairplot(df_units_sales_long, vars=["Sales", "Units"], hue="Product", diag_kind="kde", plot_kws={"alpha": 0.6})
 plt.suptitle("Sales vs Units by Product Category", y=1.02)
 plt.show()
 
@@ -156,44 +159,49 @@ plt.show()
 # For creating a dashboard using Plotly and Dash, you would need to set up a Dash application. Below is a simple example of how to create a dashboard with Plotly and Dash to visualize the sales data.
 import dash
 # import dash_core_components as dcc
-# import dash_html_components as html
+# import dash_html_components as htmlimport dash
 from dash import dcc, html, Input, Output
 import plotly.express as px
-# Initialize the Dash app
+
+# Initialize Dash app
 app = dash.Dash(__name__)
 app.title = "Westgate Sales Dashboard"
+
+# KPI calculation
+total_sales = df_long["Sales"].sum()
 
 # Layout
 app.layout = html.Div(
     style={"padding": "20px", "fontFamily": "Arial"},
     children=[
+
         html.H1("Westgate 2024 Sales Dashboard", style={"textAlign": "center"}),
 
-        # KPI
+        # KPI Card
         html.Div(
             children=[
                 html.H3("Total Sales"),
-                html.H2(f"₦{df_sales['Sales'].sum():,.2f}")
+                html.H2(f"₦{total_sales:,.2f}")
             ],
             style={
                 "textAlign": "center",
                 "marginBottom": "30px",
                 "backgroundColor": "#f2f2f2",
-                "padding": "15px",
+                "padding": "20px",
                 "borderRadius": "10px"
             }
         ),
 
-        # Dropdown
-        html.Label("Select Category"),
+        # Dropdown filter
+        html.Label("Select Product Category"),
         dcc.Dropdown(
-            id="category-filter",
+            id="product-filter",
             options=[
-                {"label": cat, "value": cat}
-                for cat in df_sales["Category"].unique()
+                {"label": product, "value": product}
+                for product in sorted(df_long["Product"].unique())
             ],
             value=None,
-            placeholder="All Categories",
+            placeholder="All Products",
             clearable=True
         ),
 
@@ -201,40 +209,46 @@ app.layout = html.Div(
 
         # Charts
         dcc.Graph(id="sales-boxplot"),
-        dcc.Graph(id="sales-by-category")
+        dcc.Graph(id="sales-by-product")
     ]
 )
 
 # Callbacks
 @app.callback(
     Output("sales-boxplot", "figure"),
-    Output("sales-by-category", "figure"),
-    Input("category-filter", "value")
+    Output("sales-by-product", "figure"),
+    Input("product-filter", "value")
 )
-def update_charts(selected_category):
-    if selected_category:
-        filtered_df = df_sales[df_sales["Category"] == selected_category]
+def update_charts(selected_product):
+
+    if selected_product:
+        filtered_df = df_long[df_long["Product"] == selected_product]
     else:
-        filtered_df = df_sales
+        filtered_df = df_long
 
     # Box plot
     box_fig = px.box(
         filtered_df,
-        x="Sales",
-        title="Sales Distribution",
-        color_discrete_sequence=["orange"]
+        x="Product",
+        y="Sales",
+        title="Sales Distribution by Product",
+        color="Product"
     )
 
     # Bar chart
     bar_data = (
-        filtered_df.groupby("Category", as_index=False)["Sales"].sum()
+        filtered_df
+        .groupby("Product", as_index=False)["Sales"]
+        .sum()
+        .sort_values("Sales", ascending=False)
     )
+
     bar_fig = px.bar(
         bar_data,
-        x="Category",
-        y="Sales",
-        title="Total Sales by Category",
-        color_discrete_sequence=["green"]
+        x="Sales",
+        y="Product",
+        orientation="h",
+        title="Total Sales by Product"
     )
 
     return box_fig, bar_fig
@@ -242,7 +256,8 @@ def update_charts(selected_category):
 
 # Run server
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(debug=True)
+
 
 #Ensure you are in the right directory the excel file is located, then run it: cd Data_Science/Exploratory_Data_Analysis
 # run the code in terminal using: python eda_advtask_dashboard.py
