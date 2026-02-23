@@ -298,7 +298,7 @@ def update_charts(selected_product):
         title="Total Sales by Product"
     )
 
-    # ---- Pair Plot (Scatter Matrix) ----
+    # Pair Plot (Scatter Matrix)
     pairplot_fig = px.scatter_matrix(
         filtered_df,
         dimensions=["Sales", "Units"],
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 #Ensure you are in the right directory the excel file is located, then run it: cd Data_Science/Exploratory_Data_Analysis
-# run the code in terminal using: python eda_advtask_dashboard.py
+# run the code in terminal using: python eda_adv_longformat_dashboard.py
 #goto http://127.0.0.1:8050/ to view the dashboard in your web browser. 
 # You can interact with the dropdown to filter the data by category and see how the charts update accordingly.
 

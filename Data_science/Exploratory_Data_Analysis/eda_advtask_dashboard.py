@@ -272,7 +272,7 @@ def update_charts(selected_product):
         title="Total Sales by Product"
     )
 
-    # ---- Pair Plot (Scatter Matrix) ----
+    # Pair Plot (Scatter Matrix)
     pairplot_fig = px.scatter_matrix(
         filtered_units_df,
         dimensions=["Sales", "Units"],
