@@ -12,7 +12,7 @@
 """Perform Data Cleaning, Aggregation, and Filtering for this task an excel file dataset is provided"""
 import pandas as pd
 # Load the Westgate dataset
-excel = "WESTGATE SALES SUMMARY REPPORT FOR THE YEAR 2024.xlsx"
+excel = "Experimental SALES SUMMARY REPPORT FOR THE YEAR 2024.xlsx"
 df_sales = pd.read_excel(excel, header=4)  # Adjust header so that it reads from row 4, which contains the column names
 df_sales = df_sales.dropna(axis=1, how="all") # remove empty columns "NaN" values
 df_sales = df_sales.dropna(how="all") # remove empty rows "NaN" values
@@ -188,6 +188,18 @@ plt.suptitle("Pair Plot of Sales, Unit", y=1.02)
 plt.show()
 
 
+#Because seaborn plot does not work with Dash, then i had to use plotly express to ensure it displays in dashboard.
+#Replace sns.pairplot with plotly.express.scatter_matrix
+import plotly.express as px
+
+pairplot_fig = px.scatter_matrix(
+    df_long,
+    dimensions=["Sales", "Units"],
+    color="Product",
+    title="Sales vs Units by Product Category"
+)
+
+
 
 # NEW TASK 3
 """Create a dashboard for your findings using Plotly and Dash"""
@@ -242,7 +254,8 @@ app.layout = html.Div(
 
         # Charts
         dcc.Graph(id="sales-boxplot"),
-        dcc.Graph(id="sales-by-product")
+        dcc.Graph(id="sales-by-product"),
+        dcc.Graph(id="sales-units-pairplot", figure=pairplot_fig)
     ]
 )
 
@@ -250,6 +263,7 @@ app.layout = html.Div(
 @app.callback(
     Output("sales-boxplot", "figure"),
     Output("sales-by-product", "figure"),
+    Output("sales-units-pairplot", "figure"),
     Input("product-filter", "value")
 )
 def update_charts(selected_product):
@@ -284,7 +298,15 @@ def update_charts(selected_product):
         title="Total Sales by Product"
     )
 
-    return box_fig, bar_fig
+    # ---- Pair Plot (Scatter Matrix) ----
+    pairplot_fig = px.scatter_matrix(
+        filtered_df,
+        dimensions=["Sales", "Units"],
+        color="Product",
+        title="Sales vs Units by Product Category"
+    )
+
+    return box_fig, bar_fig, pairplot_fig
 
 
 # Run server
