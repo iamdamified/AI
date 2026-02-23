@@ -307,9 +307,16 @@ if __name__ == "__main__":
 # Interpretation of Visualization 1: Sales Distribution (Box Plot)
 # The box plot shows the distribution of sales values. The median line is near the center of the box, indicating a relatively symmetric distribution. 
 # There are a few outliers on the higher end, suggesting some sales values are significantly higher than the rest, which may indicate high-value transactions or anomalies in data entry.
-# Interpretation of Visualization 2: Sales by Product Category (Bar Chart)
+# Interpretation of Visualization 2: Sales by Category (Bar Chart)
 # The bar chart reveals that the "Electronics" category has the highest total sales, followed by "Furniture" and "Office Supplies". This indicates that electronics are the most popular category among customers, contributing significantly to overall sales. The lower sales in "Office Supplies" suggest it may be a less popular category or have lower-priced items.
-# Interpretation of Visualization 3: Pair Plot of Sales, Unit
+# Interpretation of Visualization 3: Pair Plot of Sales, Quantity, and Discount
+# The pair plot shows the relationships between sales, quantity, and discount. There is a positive correlation between sales and quantity, indicating that higher quantities sold generally lead to higher sales. The relationship between sales and discount appears to be more complex, with some high sales values occurring at both low and high discount levels, suggesting that while discounts can drive sales, other factors may also influence sales performance. The distribution of quantity and discount also shows some variability, indicating that different combinations of these factors can lead to varying sales outcomes.
 
 # NEW TASK 5
 """Summarize Findings in a Report"""
+# Summary of Findings:
+# 1. The sales data shows a relatively symmetric distribution with a few high-value outliers.
+# 2. The "Electronics" category is the most popular, contributing the highest sales.
+# 3. There is a positive correlation between quantity sold and sales, indicating that higher quantities generally lead to higher sales.
+# 4. The relationship between discount and sales is complex, suggesting that while discounts can drive sales, other factors also play a role in determining sales performance.
+

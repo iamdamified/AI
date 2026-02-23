@@ -18,7 +18,7 @@ df_sales = df_sales.dropna(axis=1, how="all") # remove empty columns "NaN" value
 df_sales = df_sales.dropna(how="all") # remove empty rows "NaN" values
 
 
-# # Inspect raw dataset
+# Inspect raw dataset
 print(df_sales.head())
 print(df_sales.columns)
 print(df_sales.info())
@@ -67,132 +67,99 @@ df.columns = [
     "Canon_Unit", "Canon_Sales",
 ]
 
-# Inspect wide-dataset after conversion for analysis and ML by renaming
+#Alternatively, you can convert to long-format by separating product column from unit and "sales" columns, but for the sake of this task, we will keep it in wide-format and handle it accordingly in the visualizations and analysis.
+# Inspect dataset again after cleaning and renaming
 print(df.head())
 print(df.columns)
 print(df.info())
 print(df.describe())
 
 
-#Clean or fix wide dataset before converting to long-format for better analysis and ML:
-# Remove bad rows
+# Data Cleaning:
+
+#To drop header rows which may still be existing as headers in the data:
 df = df[df["Branch"].notna()]
 
-# Convert numerics
+# Convert numeric columns safely to numeric types, coercing errors to NaN (which can be handled later)
 for col in df.columns[1:]:
     df[col] = pd.to_numeric(df[col], errors="coerce")
 
+# #Handle missing values: 
+#This is used to combine all sales columns into one column(sales_columns) for better handling in the absence of long-format data.
+sales_columns = [col for col in df.columns if col.endswith("_Sales")]
 
-#Alternatively, you can convert to long-format by separating product column from unit and "sales" columns.
-#Long FORMAT BLOCK:
-records = []
+for col in sales_columns:
+    df[col] = df[col].fillna(df[col].median())
 
-products = [
-    ("Laptops", "Laptops_Unit", "Laptops_Sales"),
-    ("Branded Systems", "Branded_Unit", "Branded_Sales"),
-    ("Printers", "Printers_Unit", "Printers_Sales"),
-    ("Mobile Phones", "Mobile_Unit", "Mobile_Sales"),
-    ("Inks", "Inks_Unit", "Inks_Sales"),
-    ("Toners", "Toners_Unit", "Toners_Sales"),
-    ("Canon", "Canon_Unit", "Canon_Sales"),
-]
-
-for _, row in df.iterrows():
-    for product, unit_col, sales_col in products:
-        records.append({
-            "Branch": row["Branch"],
-            "Product": product,
-            "Units": row[unit_col],
-            "Sales": row[sales_col],
-        })
-
-df_long = pd.DataFrame(records)
+# Remove Duplicate entries
+df = df.drop_duplicates()
 
 
-
-# Clean Long Data:
-
-
-
-# Convert numeric safely
-df_long["Sales"] = pd.to_numeric(df_long["Sales"], errors="coerce")
-df_long["Units"] = pd.to_numeric(df_long["Units"], errors="coerce")
-
-# Remove TOTAL row
-df_long = df_long[df_long["Branch"] != "TOTAL"]
-
-df_long = df_long.dropna(subset=["Sales"])
-df_long = df_long.dropna(subset=["Units"])
-
-
-
-# Fill missing values
-# df_long["Sales"] = df_long["Sales"].fillna(df_long["Sales"].median())
-df_long["Sales"] = df_long["Sales"].fillna(0)
-df_long["Units"] = df_long["Units"].fillna(0)
-
-# Remove duplicates
-df_long = df_long.drop_duplicates()
-
-
-# Inspect long-dataset again after second conversion to long-format to make it best ready for analysis and ML.
-print(df_long.head())
-print(df_long.columns)
-print(df_long.info())
-print(df_long.describe())
-
-
-# Filter data and check: Sales greater than 1000
-high_sales = df_long[df_long["Sales"] > 1000]
-print(high_sales.head())
+# Filter data: Sales greater than 1000
+for col in sales_columns:
+    high_sales = df[df[col] > 1000]
+    print(f"Sales greater than 1000 in {col}:\n{high_sales[['Branch', col]]}\n")
 
 
 
 
 
 
-
-
-# # NEW TASK 2
-# """Generate Visualizations to illustrate Key Insights from the dataset. 
-# Use libraries such as Matplotlib or Seaborn to create visualizations to highlight trends and patterns in the data."""
+# NEW TASK 2
+"""Generate Visualizations to illustrate Key Insights from the dataset. 
+Use libraries such as Matplotlib or Seaborn to create visualizations to highlight trends and patterns in the data."""
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+
 # Visualization 1: Sales Distribution (Box Plot)
-#This works for Long Format data Visualization:
-sns.boxplot(x=df_long["Sales"], color="orange")
-plt.title("Sales Distribution")
-plt.xlabel("Sales")
-plt.show()
-
-
-
-# # Visualization 2: Sales by Product (Bar Chart)
-# #This works for Long Format data Visualization:
-sales_by_product = df_long.groupby("Product")["Sales"].sum()
-sales_by_product.plot(kind="bar", color="green")
-plt.title("Total Sales by Product")
-plt.xlabel("Product")
-plt.ylabel("Total Sales")
+# Regular box plot for wide-format data: It involves creating a long-format version of the sales data for better visualization, as box plots are more effective when comparing distributions across categories(products).
+df_long = df.melt(id_vars="Branch", value_vars=sales_columns, var_name="Product", value_name="Sales")# Reuse this for other long format visualizations
+sns.boxplot(x="Product", y="Sales", data=df_long, color="orange")
 plt.xticks(rotation=45)
-plt.tight_layout()
+plt.title("Sales Distribution by Product")
 plt.show()
 
 
+# Visualization 2: Sales by Product (Bar Chart)
+# Regular bar chart for wide-format data:
+sales_by_product = df_long.groupby("Product", as_index=False)["Sales"].sum()
+# sales_by_product = (df_long.groupby("Product")["Sales"].sum().reset_index())
+sns.barplot(data=sales_by_product, x="Sales", y="Product", orient="h", color="green")
+plt.title("Total Sales by Product")
+plt.xlabel("Total Sales")
+plt.ylabel("Product Category")
+plt.show()
 
 
 # Visualization 3: Pair Plot of Sales, Quantity, and Discount
-#This works for Long Format data Visualization:
-sns.pairplot(df_long[["Sales", "Units"]], diag_kind="kde", plot_kws={"alpha": 0.5})
-plt.suptitle("Pair Plot of Sales, Unit", y=1.02)
+# Regular Pair Plot for wide-format data:
+# You will recall that so far we have sales_columns variable for all product sales, no units_columns, hence we create it.
+units_columns = [col for col in df.columns if col.endswith("_Unit")]
+df_units = df.melt(id_vars="Branch", value_vars=units_columns, var_name="Product", value_name="Units")# newly created combined units_cloumn
+df_units["Product"] = df_units["Product"].str.replace("_Unit", "", regex=False)# Normalize units
+df_long = df.melt(id_vars="Branch", value_vars=sales_columns, var_name="Product", value_name="Sales")# recalled comnined sales_column above
+df_long["Product"] = df_long["Product"].str.replace("_Sales", "", regex=False)# Normalize sales
+df_units_sales_long = pd.merge(df_units, df_long, on=["Branch", "Product"], how="inner") # Merge units and sales long-format data on Branch and Product for pairplot
+#display to view results of the merge and the new long-format dataframe for units and sales
+print(df_units_sales_long.head())
+print(df_units_sales_long.columns)
+print(df_units_sales_long.shape)
+
+# Now we can create a pair plot to visualize the relationship between Sales and Units, colored by Product category.
+sns.pairplot(df_units_sales_long, vars=["Sales", "Units"], hue="Product", diag_kind="kde", plot_kws={"alpha": 0.6})
+plt.suptitle("Sales vs Units by Product Category", y=1.02)
 plt.show()
 
 
-
 # NEW TASK 3
-"""Create a dashboard for your findings using Plotly and Dash"""
+"""Create a dashboard for your findings using Dash."""
+# pip install dash plotly openpyxl
 
+# For creating a dashboard using Plotly and Dash, you would need to set up a Dash application. Below is a simple example of how to create a dashboard with Plotly and Dash to visualize the sales data.
 import dash
+# import dash_core_components as dcc
+# import dash_html_components as htmlimport dash
 from dash import dcc, html, Input, Output
 import plotly.express as px
 
@@ -200,7 +167,7 @@ import plotly.express as px
 app = dash.Dash(__name__)
 app.title = "Westgate Sales Dashboard"
 
-# KPI
+# KPI calculation
 total_sales = df_long["Sales"].sum()
 
 # Layout
@@ -225,8 +192,8 @@ app.layout = html.Div(
             }
         ),
 
-        # Product Dropdown
-        html.Label("Select Product"),
+        # Dropdown filter
+        html.Label("Select Product Category"),
         dcc.Dropdown(
             id="product-filter",
             options=[
@@ -291,6 +258,7 @@ def update_charts(selected_product):
 if __name__ == "__main__":
     app.run(debug=True)
 
+
 #Ensure you are in the right directory the excel file is located, then run it: cd Data_Science/Exploratory_Data_Analysis
 # run the code in terminal using: python eda_advtask_dashboard.py
 #goto http://127.0.0.1:8050/ to view the dashboard in your web browser. 
@@ -307,9 +275,16 @@ if __name__ == "__main__":
 # Interpretation of Visualization 1: Sales Distribution (Box Plot)
 # The box plot shows the distribution of sales values. The median line is near the center of the box, indicating a relatively symmetric distribution. 
 # There are a few outliers on the higher end, suggesting some sales values are significantly higher than the rest, which may indicate high-value transactions or anomalies in data entry.
-# Interpretation of Visualization 2: Sales by Product Category (Bar Chart)
+# Interpretation of Visualization 2: Sales by Category (Bar Chart)
 # The bar chart reveals that the "Electronics" category has the highest total sales, followed by "Furniture" and "Office Supplies". This indicates that electronics are the most popular category among customers, contributing significantly to overall sales. The lower sales in "Office Supplies" suggest it may be a less popular category or have lower-priced items.
-# Interpretation of Visualization 3: Pair Plot of Sales, Unit
+# Interpretation of Visualization 3: Pair Plot of Sales, Quantity, and Discount
+# The pair plot shows the relationships between sales, quantity, and discount. There is a positive correlation between sales and quantity, indicating that higher quantities sold generally lead to higher sales. The relationship between sales and discount appears to be more complex, with some high sales values occurring at both low and high discount levels, suggesting that while discounts can drive sales, other factors may also influence sales performance. The distribution of quantity and discount also shows some variability, indicating that different combinations of these factors can lead to varying sales outcomes.
 
 # NEW TASK 5
 """Summarize Findings in a Report"""
+# Summary of Findings:
+# 1. The sales data shows a relatively symmetric distribution with a few high-value outliers.
+# 2. The "Electronics" category is the most popular, contributing the highest sales.
+# 3. There is a positive correlation between quantity sold and sales, indicating that higher quantities generally lead to higher sales.
+# 4. The relationship between discount and sales is complex, suggesting that while discounts can drive sales, other factors also play a role in determining sales performance.
+
