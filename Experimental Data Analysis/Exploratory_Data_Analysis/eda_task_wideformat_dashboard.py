@@ -12,7 +12,7 @@
 """Perform Data Cleaning, Aggregation, and Filtering for this task an excel file dataset is provided"""
 import pandas as pd
 # Load the Westgate dataset
-excel = "WESTGATE SALES SUMMARY REPPORT FOR THE YEAR 2024.xlsx"
+excel = "Experimental SALES SUMMARY REPPORT FOR THE YEAR 2024.xlsx"
 df_sales = pd.read_excel(excel, header=4)  # Adjust header so that it reads from row 4, which contains the column names
 df_sales = df_sales.dropna(axis=1, how="all") # remove empty columns "NaN" values
 df_sales = df_sales.dropna(how="all") # remove empty rows "NaN" values
@@ -132,7 +132,7 @@ plt.ylabel("Product Category")
 plt.show()
 
 
-# Visualization 3: Pair Plot of Sales, Quantity, and Discount
+# Visualization 3: Pair Plot of Sales, Units
 # Regular Pair Plot for wide-format data:
 # You will recall that so far we have sales_columns variable for all product sales, no units_columns, hence we create it.
 units_columns = [col for col in df.columns if col.endswith("_Unit")]
@@ -152,8 +152,21 @@ plt.suptitle("Sales vs Units by Product Category", y=1.02)
 plt.show()
 
 
+
+#Because seaborn plot does not work with Dash, then i had to use plotly express to ensure it displays in dashboard.
+#Replace sns.pairplot with plotly.express.scatter_matrix
+import plotly.express as px
+
+pairplot_fig = px.scatter_matrix(
+    df_units_sales_long,
+    dimensions=["Sales", "Units"],
+    color="Product",
+    title="Sales vs Units by Product Category"
+)
+
+
 # NEW TASK 3
-"""Create a dashboard for your findings using Dash."""
+"""Create a dashboard for your findings using Plotly, Dash."""
 # pip install dash plotly openpyxl
 
 # For creating a dashboard using Plotly and Dash, you would need to set up a Dash application. Below is a simple example of how to create a dashboard with Plotly and Dash to visualize the sales data.
@@ -165,7 +178,7 @@ import plotly.express as px
 
 # Initialize Dash app
 app = dash.Dash(__name__)
-app.title = "Westgate Sales Dashboard"
+app.title = "Experimental Sales Dashboard"
 
 # KPI calculation
 total_sales = df_long["Sales"].sum()
@@ -209,7 +222,8 @@ app.layout = html.Div(
 
         # Charts
         dcc.Graph(id="sales-boxplot"),
-        dcc.Graph(id="sales-by-product")
+        dcc.Graph(id="sales-by-product"),
+        dcc.Graph(id="sales-units-pairplot", figure=pairplot_fig)
     ]
 )
 
@@ -217,18 +231,25 @@ app.layout = html.Div(
 @app.callback(
     Output("sales-boxplot", "figure"),
     Output("sales-by-product", "figure"),
+    Output("sales-units-pairplot", "figure"),
+    # dcc.Graph(id="sales-units-pairplot"),
     Input("product-filter", "value")
 )
 def update_charts(selected_product):
 
+    # ---- Filter SALES dataframe ----
     if selected_product:
-        filtered_df = df_long[df_long["Product"] == selected_product]
+        filtered_sales_df = df_long[df_long["Product"] == selected_product]
+        filtered_units_df = df_units_sales_long[
+            df_units_sales_long["Product"] == selected_product
+        ]
     else:
-        filtered_df = df_long
+        filtered_sales_df = df_long
+        filtered_units_df = df_units_sales_long
 
     # Box plot
     box_fig = px.box(
-        filtered_df,
+        filtered_sales_df,
         x="Product",
         y="Sales",
         title="Sales Distribution by Product",
@@ -237,7 +258,7 @@ def update_charts(selected_product):
 
     # Bar chart
     bar_data = (
-        filtered_df
+        filtered_sales_df
         .groupby("Product", as_index=False)["Sales"]
         .sum()
         .sort_values("Sales", ascending=False)
@@ -251,7 +272,15 @@ def update_charts(selected_product):
         title="Total Sales by Product"
     )
 
-    return box_fig, bar_fig
+    # Pair Plot (Scatter Matrix)
+    pairplot_fig = px.scatter_matrix(
+        filtered_units_df,
+        dimensions=["Sales", "Units"],
+        color="Product",
+        title="Sales vs Units by Product Category"
+    )
+
+    return box_fig, bar_fig, pairplot_fig
 
 
 # Run server
@@ -275,16 +304,10 @@ if __name__ == "__main__":
 # Interpretation of Visualization 1: Sales Distribution (Box Plot)
 # The box plot shows the distribution of sales values. The median line is near the center of the box, indicating a relatively symmetric distribution. 
 # There are a few outliers on the higher end, suggesting some sales values are significantly higher than the rest, which may indicate high-value transactions or anomalies in data entry.
-# Interpretation of Visualization 2: Sales by Category (Bar Chart)
+# Interpretation of Visualization 2: Sales by Product Category (Bar Chart)
 # The bar chart reveals that the "Electronics" category has the highest total sales, followed by "Furniture" and "Office Supplies". This indicates that electronics are the most popular category among customers, contributing significantly to overall sales. The lower sales in "Office Supplies" suggest it may be a less popular category or have lower-priced items.
-# Interpretation of Visualization 3: Pair Plot of Sales, Quantity, and Discount
-# The pair plot shows the relationships between sales, quantity, and discount. There is a positive correlation between sales and quantity, indicating that higher quantities sold generally lead to higher sales. The relationship between sales and discount appears to be more complex, with some high sales values occurring at both low and high discount levels, suggesting that while discounts can drive sales, other factors may also influence sales performance. The distribution of quantity and discount also shows some variability, indicating that different combinations of these factors can lead to varying sales outcomes.
+# Interpretation of Visualization 3: Pair Plot of Sales, Unit
 
 # NEW TASK 5
 """Summarize Findings in a Report"""
-# Summary of Findings:
-# 1. The sales data shows a relatively symmetric distribution with a few high-value outliers.
-# 2. The "Electronics" category is the most popular, contributing the highest sales.
-# 3. There is a positive correlation between quantity sold and sales, indicating that higher quantities generally lead to higher sales.
-# 4. The relationship between discount and sales is complex, suggesting that while discounts can drive sales, other factors also play a role in determining sales performance.
 

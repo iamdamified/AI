@@ -12,7 +12,7 @@
 """Perform Data Cleaning, Aggregation, and Filtering for this task an excel file dataset is provided"""
 import pandas as pd
 # Load the Westgate dataset
-excel = "WESTGATE SALES SUMMARY REPPORT FOR THE YEAR 2024.xlsx"
+excel = "Experimental SALES SUMMARY REPPORT FOR THE YEAR 2024.xlsx"
 df_sales = pd.read_excel(excel, header=4)  # Adjust header so that it reads from row 4, which contains the column names
 df_sales = df_sales.dropna(axis=1, how="all") # remove empty columns "NaN" values
 df_sales = df_sales.dropna(how="all") # remove empty rows "NaN" values
@@ -188,6 +188,18 @@ plt.suptitle("Pair Plot of Sales, Unit", y=1.02)
 plt.show()
 
 
+#Because seaborn plot does not work with Dash, then i had to use plotly express to ensure it displays in dashboard.
+#Replace sns.pairplot with plotly.express.scatter_matrix
+import plotly.express as px
+
+pairplot_fig = px.scatter_matrix(
+    df_long,
+    dimensions=["Sales", "Units"],
+    color="Product",
+    title="Sales vs Units by Product Category"
+)
+
+
 
 # NEW TASK 3
 """Create a dashboard for your findings using Plotly and Dash"""
@@ -242,7 +254,8 @@ app.layout = html.Div(
 
         # Charts
         dcc.Graph(id="sales-boxplot"),
-        dcc.Graph(id="sales-by-product")
+        dcc.Graph(id="sales-by-product"),
+        dcc.Graph(id="sales-units-pairplot", figure=pairplot_fig)
     ]
 )
 
@@ -250,6 +263,7 @@ app.layout = html.Div(
 @app.callback(
     Output("sales-boxplot", "figure"),
     Output("sales-by-product", "figure"),
+    Output("sales-units-pairplot", "figure"),
     Input("product-filter", "value")
 )
 def update_charts(selected_product):
@@ -284,7 +298,15 @@ def update_charts(selected_product):
         title="Total Sales by Product"
     )
 
-    return box_fig, bar_fig
+    # Pair Plot (Scatter Matrix)
+    pairplot_fig = px.scatter_matrix(
+        filtered_df,
+        dimensions=["Sales", "Units"],
+        color="Product",
+        title="Sales vs Units by Product Category"
+    )
+
+    return box_fig, bar_fig, pairplot_fig
 
 
 # Run server
@@ -292,7 +314,7 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 #Ensure you are in the right directory the excel file is located, then run it: cd Data_Science/Exploratory_Data_Analysis
-# run the code in terminal using: python eda_advtask_dashboard.py
+# run the code in terminal using: python eda_adv_longformat_dashboard.py
 #goto http://127.0.0.1:8050/ to view the dashboard in your web browser. 
 # You can interact with the dropdown to filter the data by category and see how the charts update accordingly.
 
@@ -307,16 +329,9 @@ if __name__ == "__main__":
 # Interpretation of Visualization 1: Sales Distribution (Box Plot)
 # The box plot shows the distribution of sales values. The median line is near the center of the box, indicating a relatively symmetric distribution. 
 # There are a few outliers on the higher end, suggesting some sales values are significantly higher than the rest, which may indicate high-value transactions or anomalies in data entry.
-# Interpretation of Visualization 2: Sales by Category (Bar Chart)
+# Interpretation of Visualization 2: Sales by Product Category (Bar Chart)
 # The bar chart reveals that the "Electronics" category has the highest total sales, followed by "Furniture" and "Office Supplies". This indicates that electronics are the most popular category among customers, contributing significantly to overall sales. The lower sales in "Office Supplies" suggest it may be a less popular category or have lower-priced items.
-# Interpretation of Visualization 3: Pair Plot of Sales, Quantity, and Discount
-# The pair plot shows the relationships between sales, quantity, and discount. There is a positive correlation between sales and quantity, indicating that higher quantities sold generally lead to higher sales. The relationship between sales and discount appears to be more complex, with some high sales values occurring at both low and high discount levels, suggesting that while discounts can drive sales, other factors may also influence sales performance. The distribution of quantity and discount also shows some variability, indicating that different combinations of these factors can lead to varying sales outcomes.
+# Interpretation of Visualization 3: Pair Plot of Sales, Unit
 
 # NEW TASK 5
 """Summarize Findings in a Report"""
-# Summary of Findings:
-# 1. The sales data shows a relatively symmetric distribution with a few high-value outliers.
-# 2. The "Electronics" category is the most popular, contributing the highest sales.
-# 3. There is a positive correlation between quantity sold and sales, indicating that higher quantities generally lead to higher sales.
-# 4. The relationship between discount and sales is complex, suggesting that while discounts can drive sales, other factors also play a role in determining sales performance.
-
