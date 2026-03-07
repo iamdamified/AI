@@ -11,7 +11,7 @@ for name, group in grouped:
 
 # calculate aggregate statistics
 
-#Aggregation functions using groupy:
+#Aggregation functions using groupby:
 #grouped.mean()  # Calculate the mean of each group
 #grouped.sum()   # Calculate the sum of each group
 df.groupby('Category_column')["numeric_column"].mean() # Calculate sum, mean, and count for the 'Value' column in each group/

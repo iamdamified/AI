@@ -1,4 +1,4 @@
-# Into to Numpy for Numerical Computing
+# Intro to Numpy for Numerical Computing
 # Advanced NumPy Operations
 
 #Advantages- performance, ease of use, integration
@@ -12,7 +12,7 @@ arr = np.array([1, 2, 3, 4])
 print(arr)
 
 #using built-in functions
-zeroes = np.zeros((3, 3))
+zeroes = np.zeros((3, 3)) #(rows, columns)
 print(zeroes)
 
 ones = np.ones((2, 4))
@@ -32,5 +32,5 @@ linspace_array = np.linspace(0, 10, 5) # 5 values between 0 and 10 equally space
 print(linspace_array)
 linspace_array = np.linspace(0, 10, 4) # 4 values between 0 and 10 equally spaced
 print(linspace_array)
-linspace_array = np.linspace(0, 10, 3) # 4 values between 0 and 10 equally spaced
+linspace_array = np.linspace(0, 10, 3) # 3 values between 0 and 10 equally spaced
 print(linspace_array)

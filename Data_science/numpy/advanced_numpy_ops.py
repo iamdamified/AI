@@ -50,9 +50,9 @@ import numpy as np
 # print("Random Integers: \n", random_integers)
 
 
-# #Setting Random Seeds
-# # np.random.seed(n), where n is any number
-# #This ensures random operations done below it will generate exact result(constant when same function is repeated many times; such as operations in previous page.)
+# Setting Random Seeds
+# np.random.seed(n), where n is any number
+# This ensures random operations done below it will generate exact result(constant when same function is repeated many times; such as operations in previous page.)
 
 # """1. Broadcasting Operations"""
 # matrix = np.array([[1,2,3], [4,5,6], [7,8,9]])
@@ -78,33 +78,34 @@ import numpy as np
 # print("Standard Deviation: ", np.std(dataset))
 
 
-# #Practice
+#Practice
 # """Create a 3D random array and compute statistics along specific axis."""
-# array_3d = np.random.rand(3,4,5)#3D array with shape (3,4,5) - 3 blocks of 4 rows and 5 columns each
+# # array_3d = np.random.randint(3,4,5)#3D array with shape (3,4,5) - 3 blocks of 4 rows and 5 columns each
+# array_3d = np.random.randint(1,10, size=(3,4,5))
 # print("3D Array: \n", array_3d)
 # print("3D Array Shape: ", array_3d.shape)# displays the dimensions of the array (3,4,5)
 # print("Sum along axis 0: ", np.sum(array_3d, axis=0))# sums across the first dimension (3 blocks), resulting in a 4x5 array where each element is the sum of corresponding elements from the 3 blocks
 # print("Sum along axis 1: ", np.sum(array_3d, axis=1))# sums across the second dimension (4 rows), resulting in a 3x5 array where each element is the sum of corresponding elements from the 4 rows within each block
 # print("Sum along axis 2: ", np.sum(array_3d, axis=2))# sums across the third dimension (5 columns), resulting in a 3x4 array where each element is the sum of corresponding elements from the 5 columns within each block and row
 
-array_3d = np.random.randint(1, 10, size=(3,4,5))#3D array with shape (3,4,5) - 3 blocks of 4 rows and 5 columns each
-print("3D Array: \n", array_3d)
-print("3D Array Shape: ", array_3d.shape)# displays the dimensions of the array (3,4,5)
-print("Sum along axis 0: ", np.sum(array_3d, axis=0))# sums across the first dimension (3 blocks), resulting in a 4x5 array where each element is the sum of corresponding elements from the 3 blocks
-print("Sum along axis 1: ", np.sum(array_3d, axis=1))# sums across the second dimension (4 rows), resulting in a 3x5 array where each element is the sum of corresponding elements from the 4 rows within each block
-print("Sum along axis 2: ", np.sum(array_3d, axis=2))# sums across the third dimension (5 columns), resulting in a 3x4 array where each element is the sum of corresponding elements from the 5 columns within each block and row
+# array_3d = np.random.randint(1, 10, size=(3,4,5))#3D array with shape (3,4,5) - 3 blocks of 4 rows and 5 columns each
+# print("3D Array: \n", array_3d)
+# print("3D Array Shape: ", array_3d.shape)# displays the dimensions of the array (3,4,5)
+# print("Sum along axis 0: ", np.sum(array_3d, axis=0))# sums across the first dimension (3 blocks), resulting in a 4x5 array where each element is the sum of corresponding elements from the 3 blocks
+# print("Sum along axis 1: ", np.sum(array_3d, axis=1))# sums across the second dimension (4 rows), resulting in a 3x5 array where each element is the sum of corresponding elements from the 4 rows within each block
+# print("Sum along axis 2: ", np.sum(array_3d, axis=2))# sums across the third dimension (5 columns), resulting in a 3x4 array where each element is the sum of corresponding elements from the 5 columns within each block and row
 
 
 """Write a program to generate a dataset of random floats and normalize the values btw 0 and 1."""
 dataset = np.random.rand(5,5)
 print("Original Dataset: \n", dataset)
 
-# Normalize the dataset to range [0,1]
-normalized_dataset = (dataset - dataset.min()) / (dataset.max() - dataset.min())
-print("Normalized Dataset: \n", normalized_dataset)#
+# # Normalize the dataset to range [0,1]
+# normalized_dataset = (dataset - dataset.min()) / (dataset.max() - dataset.min())
+# print("Normalized Dataset: \n", normalized_dataset)#
 
 
-"""Implement conditional replacement to create a binary mask of values above a certain threshold."""
-threshold = 0.5
-binary_mask = dataset > threshold
-print("Binary Mask (values > 0.5): \n", binary_mask)# This creates a boolean array where True indicates values greater than 0.5 and False indicates values less than or equal to 0.5.
+# """Implement conditional replacement to create a binary mask of values above a certain threshold."""
+# threshold = 0.5
+# binary_mask = dataset > threshold
+# print("Binary Mask (values > 0.5): \n", binary_mask)# This creates a boolean array where True indicates values greater than 0.5 and False indicates values less than or equal to 0.5.

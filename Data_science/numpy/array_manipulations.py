@@ -48,10 +48,11 @@ print(reshaped)
 
 a = np.arange(1,6) #arange is used to define a particular range or contents for an array
 b = np.arange(6,11)
+print(a, b)
 print("Add: ", a + b)
-print("Add: ", a - b)
-print("Add: ", a * b)
-print("Add: ", a / b)
+print("subtract: ", a - b)
+print("multiply: ", a * b)
+print("divide: ", a / b)
 
 
 # Create a 3x3 matrix and perform operations
@@ -90,5 +91,5 @@ print("Normalized array:", normalized_arr)
 """Generate a random array and find the minimum and maximum values."""
 random_arr = np.random.rand(5)
 print("Random array:", random_arr)
-print("Minimum value:", np.min(random_arr))
+print("Minimum value:", random_arr.min())# or np.max(random_arr)
 print("Maximum value:", np.max(random_arr))
