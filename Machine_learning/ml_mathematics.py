@@ -101,6 +101,9 @@ decomposes a matrix A A into 3 matrices: A = U.E.Vt
 U - Left singular vectors(orthogonal matrix)
 E - Diagonal matrix of singular values(non-negative)
 Vt - Right singular vectors(Orthogonal matrix)."""
+
+
+
 # Applications of SVD
 
 A = np.array([[2,3], [1,4]])
