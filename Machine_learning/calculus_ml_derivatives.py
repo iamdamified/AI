@@ -82,3 +82,106 @@ print("Partial derivative/Gradient with respect to y:", grad_y)
 """3. Implement Gradient Descent for a Linear Regression"""
 # For this we have a function in numpy.
 import numpy as np
+# Define the grdient descent function
+def gradient_descent(X, y, theta, learning_rate, iterations):
+    m = len(y)  # number of training examples
+    for i in range(iterations):
+        predictions = np.dot(X, theta)  # predicted values
+        errors = predictions - y     # errors
+        gradient = (1/m) * np.dot(X.T, errors)  # compute the gradient
+        theta -= learning_rate * gradient  # update parameters
+    return theta
+
+# Sample data
+X = np.array([[1, 1], [1, 2], [1, 3]])  # feature matrix
+y = np.array([2, 2.5, 3.5])  # target values
+theta = np.array([0.1, 0.1])  # initial parameters
+learning_rate = 0.01
+iterations = 1000
+
+# Run gradient descent
+optimized_theta = gradient_descent(X, y, theta, learning_rate, iterations)
+print("Optimized parameters:", optimized_theta)
+
+
+# Additional Exercise
+"""1. Use SymPy to compute the second-order derivatives of a function(Hessian Matrix)"""
+# Define a multivariable function
+x, y = sp.symbols('x y')
+f = x**2 + y**2
+# Compute second-order derivatives
+hessian_xx = sp.diff(f, x, x)  # second derivative with respect to x
+hessian_yy = sp.diff(f, y, y)  # second derivative with respect to y
+hessian_xy = sp.diff(f, x, y)  # mixed second derivative
+print("Hessian Matrix:")
+print(f"[[{hessian_xx}, {hessian_xy}], [{hessian_xy}, {hessian_yy}]]")
+
+
+"""2. Implement Gradient Descent with multiple learning rates and compare convergence speeds"""
+import numpy as np
+import matplotlib.pyplot as plt
+def gradient_descent(X, y, theta, learning_rate, iterations):
+    m = len(y)
+    cost_history = []
+    for i in range(iterations):
+        predictions = np.dot(X, theta)
+        errors = predictions - y
+        gradient = (1/m) * np.dot(X.T, errors)
+        theta -= learning_rate * gradient
+        cost = (1/(2*m)) * np.sum(errors**2)  # compute cost
+        cost_history.append(cost)
+    return theta, cost_history
+# Sample data
+X = np.array([[1, 1], [1, 2], [1, 3]])
+y = np.array([2, 2.5, 3.5])
+initial_theta = np.array([0.1, 0.1])
+learning_rates = [0.001, 0.01, 0.1]
+plt.figure(figsize=(10, 6))
+for lr in learning_rates:
+    theta = initial_theta.copy()
+    optimized_theta, cost_history = gradient_descent(X, y, theta, lr, 1000)
+    plt.plot(cost_history, label=f'Learning Rate: {lr}')
+plt.xlabel('Iterations')
+plt.ylabel('Cost')
+plt.title('Gradient Descent with Different Learning Rates')
+plt.legend()
+plt.show()
+
+
+"""3. visualize the gradient descent process on a quadratic function"""
+import numpy as np
+import matplotlib.pyplot as plt
+# Define the quadratic function
+def f(x):
+    return x**2 + 4*x + 4
+# Compute the gradient
+def gradient(x):
+    return 2*x + 4
+# Gradient descent implementation
+def gradient_descent(starting_point, learning_rate, iterations):
+    x = starting_point
+    x_history = [x]
+    for _ in range(iterations):
+        grad = gradient(x)
+        x -= learning_rate * grad
+        x_history.append(x)
+    return x_history
+# Parameters
+starting_point = 0.0
+learning_rate = 0.1
+iterations = 100
+# Run gradient descent
+x_history = gradient_descent(starting_point, learning_rate, iterations)
+# Visualize the function and the gradient descent path
+x_values = np.linspace(-10, 2, 400)
+y_values = f(x_values)
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, y_values, label='f(x) = x^2 + 4x + 4')
+plt.scatter(x_history, [f(x) for x in x_history], color='red', label='Gradient Descent Path')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.title('Gradient Descent on a Quadratic Function')
+plt.legend()
+plt.show()
+
+
