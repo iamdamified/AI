@@ -40,7 +40,7 @@ print(indefinite_integral)  # Output: x**3/3
     - For variants of SGD, the purposes are: 
         Mini-batch SGD: Balances efficiency and convergence by using small batches of data, reducing noise in gradient estimates compared to pure SGD while still being faster than full-batch gradient descent.
         Momentum: Accelerates convergence by adding a fraction of the previous update to the current update, helping to navigate ravines and avoid local minima.
-        Adam: Combines the benefits of Momentum and RMSProp by maintaining adaptive learning rates for each parameter, improving convergence and performance in training deep learning models."""
+        Adam Optimizing: Combines the benefits of Momentum and RMSProp by maintaining adaptive learning rates for each parameter, improving convergence and performance in training deep learning models."""
 
 
 #Exercises:
@@ -48,9 +48,11 @@ print(indefinite_integral)  # Output: x**3/3
 # Define the variable and function
 x = sp.Symbol('x')
 f = sp.exp(-x) 
+
 # Compute the indefinite integral
 indefinite_integral = sp.integrate(f, x)
 print("Indefinite Integral:", indefinite_integral)
+
 # Compute the definite integral from 0 to infinity
 definite_integral = sp.integrate(f, (x, 0, sp.oo))
 print("Definite Integral:", definite_integral)  
@@ -60,9 +62,27 @@ print("Definite Integral:", definite_integral)
 import numpy as np
 # Generate synthetic data
 np.random.seed(42)
-X = 2 *np.random.randn(100, 1)
+X = 2 * np.random.randn(100, 1)
 y = 4 + 3 * X + 1 + np.random.randn(100, 1)
 # Add bias term to X
 X_b = np.c_[np.ones((100, 1)), X]  # add bias term (intercept)
 # SGD implementation
-def stochastic_gradient_descent(X, y, learning_rate=0.01, n_epochs=
+def stochastic_gradient_descent(X, y, learning_rate, n_epocs):
+    m = len(y)
+    for epoch in range(n_epocs):
+        for i in range(m):
+            random_index = np.random.randint(m)
+            xi = X[random_index:random_index+1]
+            yi = y[random_index:random_index+1]
+            gradients = 2 * xi.T @ (xi @ theta - yi)
+            theta -= learning_rate * gradients
+    return theta
+
+# Initialize parameters
+theta = np.random.randn(2, 1)  # random initialization
+# Train the model using SGD parameters
+learning_rate = 0.01
+n_epochs = 50
+# Perform SGD optimization
+theta_opt = stochastic_gradient_descent(X_b, y, theta,learning_rate, n_epochs)
+print("Optimized Parameters (theta):", theta_opt)
